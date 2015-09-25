@@ -6,7 +6,6 @@ begin
   # Otherwise you may get:
   # simplecov-0.10.0/lib/simplecov/defaults.rb:50: warning: global variable `$ERROR_INFO' not initialized
   require 'support/simplecov'
-
   AppCoverage.start
 rescue LoadError
   STDERR.puts 'Running without SimpleCov'
@@ -19,7 +18,6 @@ require 'action_controller/test_case'
 require 'action_controller/railtie'
 require 'active_support/json'
 require 'fileutils'
-
 FileUtils.mkdir_p(File.expand_path('../../tmp/cache', __FILE__))
 
 gem 'minitest'

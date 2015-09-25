@@ -4,8 +4,8 @@ module ActiveModel
       class FlatJson < Attributes
         attr_accessor :_flattened
 
-        def serializable_hash(options = nil)
-          hash = { root => super(options) }
+        def serializable_hash(*)
+          hash = { root => super }
           self._flattened = {}
           flatten(hash)
           singularize_lone_objects
@@ -13,9 +13,13 @@ module ActiveModel
           _flattened
         end
 
+        # recursively iterates over an already adapted hash and
+        # unwraps nested objects, adding that to the root of the
+        # the hash
         #
-        def flatten(root)
-          root.each_with_object({}) do |(key, item), hash|
+        # @param [Hash] adapted_hash the hash to unwrap
+        def flatten(adapted_hash)
+          adapted_hash.each_with_object({}) do |(key, item), hash|
             if item.is_a?(Array)
               new_key = ids_name_for(key)
               hash[new_key] = item.map do |i|
@@ -55,10 +59,12 @@ module ActiveModel
           _flattened[key] << data
         end
 
+        # converts :association_name to :association_name_ids
         def ids_name_for(name)
           id_name_for(name).to_s.pluralize.to_sym
         end
 
+        # converts :association_name to :association_name_id
         def id_name_for(name)
           name.to_s.singularize.foreign_key.to_sym
         end
