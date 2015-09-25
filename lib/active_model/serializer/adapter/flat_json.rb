@@ -13,6 +13,7 @@ module ActiveModel
           _flattened
         end
 
+        #
         def flatten(root)
           root.each_with_object({}) do |(key, item), hash|
             if item.is_a?(Array)
@@ -31,27 +32,27 @@ module ActiveModel
           end
         end
 
+        # @note _flatten[key] will always be an array
+        #
+        # @param [Symbol] key the type of data
+        # @param [Object] data model must have id field
         def add(key, data)
-          return if associations_contain?(data, key)
-
-          if _flattened[key].is_a?(Hash)
-            # make array
-            value = _flattened[key]
-            _flattened[key] = [value, data]
-          else
-            # already is array
-            _flattened[key] ||= []
-            # make sure that we aren't adding the same object with different data
-            old = _flattened[key].find { |i| i[:id] == data[:id] }
-            # if we are, merge - new object will have additional associations
-            # (list of ids for each relationship)
-            if old
-              _flattened[key].delete(old)
-              data = old.merge(data)
-            end
-
-            _flattened[key] << data
+          return if include?(data, key)
+          # make array - if there ends up only being one of this kind
+          # object, it will be un-arrayed later in singularize_lone_objects
+          # if this array only contains one object
+          _flattened[key] ||= []
+          # make sure that we aren't adding the same object with different data
+          old = _flattened[key].find { |i| i[:id] == data[:id] }
+          # if data is the 'same' as old, merge
+          # - new object will have additional associations
+          #  (list of ids for each relationship)
+          if old
+            _flattened[key].delete(old)
+            data = old.merge(data)
           end
+
+          _flattened[key] << data
         end
 
         def ids_name_for(name)
@@ -88,31 +89,8 @@ module ActiveModel
           self._flattened = temp
         end
 
-        # adds a set of objects to the @serialized structure,
-        # while checking to make sure that a particular object
-        # isn't already tracked.
-        def append_to_serialized(objects)
-          objects ||= {}
-
-          objects.each do |association_name, data|
-            _flattened[association_name] ||= []
-
-            if data.is_a?(Array)
-              data.each do |sub_data|
-                append_to_serialized(association_name => sub_data)
-              end
-            else
-              unless associations_contain?(data, association_name)
-                add(association_name, data)
-              end
-            end
-          end
-        end
-
-        # checks if the item exists in the current flattened object
-        def associations_contain?(item, key)
+        def include?(item, key)
           return false if _flattened[key].nil?
-
           _flattened[key] == item || _flattened[key].include?(item)
         end
       end

@@ -6,6 +6,7 @@ begin
   # Otherwise you may get:
   # simplecov-0.10.0/lib/simplecov/defaults.rb:50: warning: global variable `$ERROR_INFO' not initialized
   require 'support/simplecov'
+
   AppCoverage.start
 rescue LoadError
   STDERR.puts 'Running without SimpleCov'
@@ -61,3 +62,4 @@ require 'support/serialization_testing'
 require 'fixtures/active_record'
 
 require 'fixtures/poro'
+  SimpleCov.formatter = SimpleCov::Formatter::HTMLFormatter

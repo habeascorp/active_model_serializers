@@ -26,11 +26,40 @@ module ActionController
                    include: [:blog, :author, comments: [:post, :author]],
                    adapter: :flat_json
           end
+
+          def render_author
+            setup_data
+            @author.posts = [@post]
+            @author.roles = []
+            @author.bio = nil
+            render json: @author, adapter: :flat_json
+          end
         end
 
         tests FlatJsonNestedTestController
 
-        def test_relevant_associated_objects_in_json_root
+        def test_render_author
+          get :render_author
+          response = JSON.parse(@response.body)
+
+          expected = {
+            post: {
+              id: 42, title: 'New Post', body: 'Body'
+            },
+            author: {
+              id: 1,
+              name: 'Steve K.',
+              post_ids: [42],
+              role_ids: [],
+              bio: nil
+            }
+          }.to_json
+         expected = JSON.parse(expected)
+
+         assert_equal(expected, response)
+        end
+
+        def test_render_objects_objects_in_json_root
           get :render_objects_in_json_root
           response = JSON.parse(@response.body)
 
