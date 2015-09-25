@@ -5,7 +5,6 @@ module ActiveModel
 
         attr_accessor :_flattened
 
-        require 'pry-byebug'
         def serializable_hash(options = nil)
           hash = { root => super(options) }
           self._flattened = {}
