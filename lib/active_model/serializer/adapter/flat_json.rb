@@ -2,7 +2,6 @@ module ActiveModel
   class Serializer
     module Adapter
       class FlatJson < Attributes
-
         attr_accessor :_flattened
 
         def serializable_hash(options = nil)
@@ -15,10 +14,13 @@ module ActiveModel
         end
 
         def flatten(root)
-          root = root.each_with_object({}) do |(key, item), hash|
+          root.each_with_object({}) do |(key, item), hash|
             if item.is_a?(Array)
               new_key = ids_name_for(key)
-              hash[new_key] = item.map{ |i| add(key, flatten(i)); i[:id] }
+              hash[new_key] = item.map do |i|
+                add(key, flatten(i))
+                i[:id]
+              end
             elsif item.is_a?(Hash)
               new_key = id_name_for(key)
               add(key, flatten(item))
@@ -30,25 +32,25 @@ module ActiveModel
         end
 
         def add(key, data)
-          unless associations_contain?(data, key)
-            if _flattened[key].is_a?(Hash)
-              # make array
-              value = _flattened[key]
-              _flattened[key] = [value, data]
-            else
-              # already is array
-              _flattened[key] ||= []
-              # make sure that we aren't adding the same object with different data
-              old = _flattened[key].select{ |i| i[:id] == data[:id] }.first
-              # if we are, merge - new object will have additional associations
-              # (list of ids for each relationship)
-              if old
-                _flattened[key].delete(old)
-                data = old.merge(data)
-              end
+          return if associations_contain?(data, key)
 
-              _flattened[key] << data
+          if _flattened[key].is_a?(Hash)
+            # make array
+            value = _flattened[key]
+            _flattened[key] = [value, data]
+          else
+            # already is array
+            _flattened[key] ||= []
+            # make sure that we aren't adding the same object with different data
+            old = _flattened[key].find { |i| i[:id] == data[:id] }
+            # if we are, merge - new object will have additional associations
+            # (list of ids for each relationship)
+            if old
+              _flattened[key].delete(old)
+              data = old.merge(data)
             end
+
+            _flattened[key] << data
           end
         end
 
@@ -113,7 +115,6 @@ module ActiveModel
 
           _flattened[key] == item || _flattened[key].include?(item)
         end
-
       end
     end
   end

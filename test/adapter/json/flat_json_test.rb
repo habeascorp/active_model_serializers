@@ -27,11 +27,11 @@ module ActiveModel
             @post.author = @author
             @first_comment.post = @post
             @second_comment.post = @post
-            @blog = Blog.new(id: 1, name: "My Blog!!")
-            @parent_blog = ParentBlog.new(id: 2, name: "Parent Blog!!")
+            @blog = Blog.new(id: 1, name: 'My Blog!!')
+            @parent_blog = ParentBlog.new(id: 2, name: 'Parent Blog!!')
             @post.blog = @blog
             @post.parent_blog = @parent_blog
-            @tag = Tag.new(id: 1, name: "#hash_tag")
+            @tag = Tag.new(id: 1, name: '#hash_tag')
             @post.tags = [@tag]
           end
 
@@ -56,8 +56,8 @@ module ActiveModel
 
             expected = {
               comments: [
-                { :id=>1, :body=>"ZOMG A COMMENT" },
-                { :id=>2, :body=>"ZOMG ANOTHER COMMENT" }
+                { :id => 1, :body => 'ZOMG A COMMENT' },
+                { :id => 2, :body => 'ZOMG ANOTHER COMMENT' }
               ],
               blog: {
                 id: 999,
@@ -71,13 +71,12 @@ module ActiveModel
                 id: 42,
                 title: 'New Post',
                 body: 'Body',
-                comment_ids: [1,2],
+                comment_ids: [1, 2],
                 author_id: 1,
                 blog_id: 999
               }
              }
             actual = serializable.serializable_hash
-
 
             assert_equal(expected, actual)
           end
@@ -88,7 +87,7 @@ module ActiveModel
               serializer: HasOnePostSerializer)
 
             expected = {
-              id: 2, name: "Parent Blog!!"
+              id: 2, name: 'Parent Blog!!'
             }
 
             assert_equal(expected, serializable.serializable_hash[:parent_blog])
@@ -98,7 +97,7 @@ module ActiveModel
             serializable = SerializableResource.new(@post, adapter: FlatJson)
 
             assert_equal({
-                id: 1, name: "Steve K."
+                id: 1, name: 'Steve K.'
               }, serializable.serializable_hash[:author])
           end
         end
