@@ -54,9 +54,9 @@ module ActionController
               bio: nil
             }
           }.to_json
-         expected = JSON.parse(expected)
+          expected = JSON.parse(expected)
 
-         assert_equal(expected, response)
+          assert_equal(expected, response)
         end
 
         def test_render_objects_objects_in_json_root
