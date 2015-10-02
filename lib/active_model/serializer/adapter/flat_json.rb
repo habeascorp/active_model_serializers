@@ -21,10 +21,15 @@ module ActiveModel
         def flatten(adapted_hash)
           adapted_hash.each_with_object({}) do |(key, item), hash|
             if item.is_a?(Array)
-              new_key = ids_name_for(key)
-              hash[new_key] = item.map do |i|
-                add(key, flatten(i))
-                i[:id]
+              is_of_hashes = item.first.is_a?(Hash)
+              new_key = key.to_s.include?('_id') ? key : ids_name_for(key)
+              if is_of_hashes
+                hash[new_key] = item.map do |i|
+                  add(key, flatten(i))
+                  i[:id]
+                end
+              else
+                hash[new_key] = item
               end
             elsif item.is_a?(Hash)
               new_key = id_name_for(key)

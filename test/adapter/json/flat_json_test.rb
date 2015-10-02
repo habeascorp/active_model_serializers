@@ -16,6 +16,15 @@ module ActiveModel
             has_one :parent_blog
           end
 
+          class IdsSerializer < ActiveModel::Serializer
+            attributes :id, :title, :comment_ids
+
+            undef :comment_ids
+            def comment_ids
+              object.comments.collect(&:id)
+            end
+          end
+
           def setup
             # ActiveModel::Serializer.config.sideload_associations = true
             ActionController::Base.cache_store.clear
@@ -37,6 +46,16 @@ module ActiveModel
 
           def teardown
             # ActiveModel::Serializer.config.sideload_associations = false
+          end
+
+          def test_comment_ids
+            serializable = SerializableResource.new(@post, adapter: FlatJson, serializer: IdsSerializer)
+            expected = {
+              post: { id: 42, title: 'New Post', comment_ids: [1, 2] }
+            }
+            actual = serializable.serializable_hash
+
+            assert_equal expected, actual
           end
 
           def test_associations_not_present_in_base_model
